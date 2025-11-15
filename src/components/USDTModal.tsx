@@ -15,7 +15,7 @@ interface USDTModalProps {
   onConfirm: () => void;
 }
 
-const USDTModal = ({ isOpen, onClose, formData, onConfirm }: USDTModalProps) => {
+const USDTModal = ({ isOpen, onClose, formData: _formData, onConfirm }: USDTModalProps) => {
   const [copied, setCopied] = useState(false);
   const [hasSent, setHasSent] = useState(false);
 

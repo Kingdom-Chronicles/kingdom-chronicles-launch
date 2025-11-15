@@ -82,28 +82,31 @@ export const sendEmailNotification = async (emailData: EmailData): Promise<void>
 
 /**
  * Format email message based on type
+ * 
+ * Note: This function is currently unused but kept for future EmailJS integration.
+ * Uncomment the EmailJS code block above to use this function.
  */
-const formatEmailMessage = (emailData: EmailData): string => {
-  if (emailData.type === 'reservation') {
-    return `
-New VIP Reservation Received!
-
-Name: ${emailData.data.name}
-Email: ${emailData.data.email}
-Phone: ${emailData.data.phone || 'Not provided'}
-Payment Method: ${emailData.data.paymentMethod}
-Amount: $${emailData.data.amount}
-
-Timestamp: ${new Date().toISOString()}
-    `.trim();
-  } else {
-    return `
-New Email Subscription!
-
-Email: ${emailData.data.email}
-
-Timestamp: ${new Date().toISOString()}
-    `.trim();
-  }
-};
+// const formatEmailMessage = (emailData: EmailData): string => {
+//   if (emailData.type === 'reservation') {
+//     return `
+// New VIP Reservation Received!
+//
+// Name: ${emailData.data.name}
+// Email: ${emailData.data.email}
+// Phone: ${emailData.data.phone || 'Not provided'}
+// Payment Method: ${emailData.data.paymentMethod}
+// Amount: $${emailData.data.amount}
+//
+// Timestamp: ${new Date().toISOString()}
+//     `.trim();
+//   } else {
+//     return `
+// New Email Subscription!
+//
+// Email: ${emailData.data.email}
+//
+// Timestamp: ${new Date().toISOString()}
+//     `.trim();
+//   }
+// };
 
