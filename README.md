@@ -249,5 +249,5 @@ For issues or questions, contact: masikotimo@gmail.com
 
 ---
 
-**Note:** This landing page is completely separate from the main Kingdom Chronicles game project and will not affect production users.
+**Note:** This landing page is completely separate from the main Kingdom Chronicles game project and will not affect production userss.
 
