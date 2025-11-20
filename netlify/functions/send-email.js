@@ -61,16 +61,36 @@ exports.handler = async (event, context) => {
     const emailPass = process.env.EMAIL_PASS;
     const recipientEmail = to || process.env.NOTIFICATION_EMAIL || 'masikotimo@gmail.com';
 
+    // Log environment variables (for debugging - remove sensitive data in production)
+    console.log('=== Environment Variables Check ===');
+    console.log('EMAIL_USER exists:', !!emailUser);
+    console.log('EMAIL_USER length:', emailUser ? emailUser.length : 0);
+    console.log('EMAIL_PASS exists:', !!emailPass);
+    console.log('EMAIL_PASS length:', emailPass ? emailPass.length : 0);
+    console.log('NOTIFICATION_EMAIL:', recipientEmail);
+    console.log('All env vars:', Object.keys(process.env).filter(key => key.includes('EMAIL')));
+    console.log('===================================');
+
     if (!emailUser || !emailPass) {
-      console.error('Email credentials not configured');
+      console.error('❌ Email credentials not configured');
+      console.error('EMAIL_USER:', emailUser ? 'SET' : 'MISSING');
+      console.error('EMAIL_PASS:', emailPass ? 'SET' : 'MISSING');
+      
       return {
         statusCode: 500,
         headers: {
           'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ 
+          success: false,
           error: 'Email service not configured',
-          message: 'Please set EMAIL_USER and EMAIL_PASS in Netlify environment variables'
+          message: 'Please set EMAIL_USER and EMAIL_PASS in Netlify environment variables',
+          debug: {
+            emailUserExists: !!emailUser,
+            emailPassExists: !!emailPass,
+            availableEnvVars: Object.keys(process.env).filter(key => key.includes('EMAIL'))
+          }
         }),
       };
     }
@@ -138,6 +158,11 @@ Timestamp: ${new Date().toLocaleString()}
     }
 
     // Send email
+    console.log('📧 Attempting to send email...');
+    console.log('From:', emailUser);
+    console.log('To:', recipientEmail);
+    console.log('Subject:', subject);
+    
     const info = await transporter.sendMail({
       from: `"Kingdom Chronicles" <${emailUser}>`,
       to: recipientEmail,
@@ -146,7 +171,8 @@ Timestamp: ${new Date().toLocaleString()}
       html,
     });
 
-    console.log('Email sent successfully:', info.messageId);
+    console.log('✅ Email sent successfully!');
+    console.log('Message ID:', info.messageId);
 
     return {
       statusCode: 200,
