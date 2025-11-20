@@ -34,30 +34,51 @@ export interface EmailData {
  */
 export const sendEmailNotification = async (emailData: EmailData): Promise<void> => {
   try {
-    // Option 1: Use EmailJS (client-side)
-    // Uncomment and configure if using EmailJS
-    /*
+    // Option 1: Use EmailJS (client-side) - No backend needed!
+    // Set VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, and VITE_EMAILJS_PUBLIC_KEY
+    // Note: Install @emailjs/browser if using EmailJS: npm install @emailjs/browser
     if (import.meta.env.VITE_EMAILJS_SERVICE_ID) {
-      const emailjs = await import('@emailjs/browser');
-      await emailjs.send(
-        import.meta.env.VITE_EMAILJS_SERVICE_ID,
-        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-        {
+      try {
+        // @ts-ignore - Optional dependency, only loaded if EmailJS is configured
+        const emailjs = await import('@emailjs/browser');
+        
+        // Prepare template parameters based on email type
+        const templateParams: Record<string, string> = {
           to_email: EMAIL_CONFIG.notificationEmail,
-          from_email: emailData.data.email || 'noreply@kingdomchronicles.com',
-          subject: emailData.type === 'reservation' 
-            ? `New VIP Reservation - ${emailData.data.name}`
-            : `New Email Subscription - ${emailData.data.email}`,
-          message: formatEmailMessage(emailData),
-        },
-        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-      );
-      return;
-    }
-    */
+          timestamp: new Date().toLocaleString(),
+        };
 
-    // Option 2: Use backend API endpoint (recommended for production)
-    const response = await fetch(import.meta.env.VITE_EMAIL_API_ENDPOINT || '/api/send-email', {
+        if (emailData.type === 'reservation') {
+          templateParams.name = emailData.data.name || '';
+          templateParams.email = emailData.data.email || '';
+          templateParams.phone = emailData.data.phone || 'Not provided';
+          templateParams.payment_method = emailData.data.paymentMethod || 'Not selected';
+          templateParams.amount = `$${emailData.data.amount || '0'}`;
+        } else {
+          templateParams.email = emailData.data.email || '';
+          templateParams.name = emailData.data.name || '';
+        }
+
+        await emailjs.send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID,
+          import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+          templateParams,
+          import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+        );
+        
+        console.log('Email sent via EmailJS');
+        return;
+      } catch (emailjsError) {
+        console.error('EmailJS error:', emailjsError);
+        // Fall through to API endpoint if EmailJS fails
+      }
+    }
+
+    // Option 2: Use backend API endpoint (Netlify Functions or Vercel)
+    // Set VITE_EMAIL_API_ENDPOINT (defaults to /api/send-email)
+    const endpoint = import.meta.env.VITE_EMAIL_API_ENDPOINT || '/api/send-email';
+    
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -69,10 +90,11 @@ export const sendEmailNotification = async (emailData: EmailData): Promise<void>
     });
 
     if (!response.ok) {
-      throw new Error('Failed to send email');
+      const errorText = await response.text();
+      throw new Error(`Failed to send email: ${errorText}`);
     }
 
-    console.log('Email notification sent successfully');
+    console.log('Email notification sent successfully via API');
   } catch (error) {
     console.error('Error sending email notification:', error);
     // In production, you might want to log this to an error tracking service

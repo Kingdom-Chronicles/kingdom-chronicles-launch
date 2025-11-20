@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Crown } from 'lucide-react';
 import { useState } from 'react';
-import ReservationModal from './ReservationModal';
+import SignUpModal from './SignUpModal';
 
 const Hero = () => {
-  const [showReservationModal, setShowReservationModal] = useState(false);
+  const [showSignUpModal, setShowSignUpModal] = useState(false);
 
   return (
     <>
@@ -49,7 +49,7 @@ const Hero = () => {
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
             >
               <button
-                onClick={() => setShowReservationModal(true)}
+                onClick={() => setShowSignUpModal(true)}
                 className="group relative px-8 py-4 bg-gradient-to-r from-kingdom-gold to-yellow-400 text-gray-900 font-bold text-lg rounded-lg shadow-2xl hover:shadow-kingdom-gold/50 transition-all duration-300 hover:scale-105 flex items-center gap-2"
               >
                 Reserve Your Spot - $1
@@ -96,9 +96,9 @@ const Hero = () => {
         </motion.div>
       </section>
 
-      <ReservationModal
-        isOpen={showReservationModal}
-        onClose={() => setShowReservationModal(false)}
+      <SignUpModal
+        isOpen={showSignUpModal}
+        onClose={() => setShowSignUpModal(false)}
       />
     </>
   );

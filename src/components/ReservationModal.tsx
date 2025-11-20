@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X, CreditCard, Smartphone, Wallet, Coins } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, CreditCard, Smartphone, Wallet, Coins, CheckCircle2, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { PAYMENT_CONFIG } from '../config/offers';
@@ -9,11 +9,24 @@ import USDTModal from './USDTModal';
 interface ReservationModalProps {
   isOpen: boolean;
   onClose: () => void;
+  preFilledData?: {
+    name: string;
+    email: string;
+  };
 }
 
 type PaymentMethod = 'card' | 'mobile-money' | 'paypal' | 'usdt' | null;
 
-const ReservationModal = ({ isOpen, onClose }: ReservationModalProps) => {
+const VIP_PERKS = [
+  'Early access to all game features',
+  'Exclusive in-game content and rewards',
+  'Priority customer support',
+  'Beta testing opportunities',
+  'VIP community access',
+  'Special launch day bonuses',
+];
+
+const ReservationModal = ({ isOpen, onClose, preFilledData }: ReservationModalProps) => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null);
   const [showUSDTModal, setShowUSDTModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -21,6 +34,17 @@ const ReservationModal = ({ isOpen, onClose }: ReservationModalProps) => {
     email: '',
     phone: '',
   });
+
+  // Populate form data when preFilledData is provided
+  useEffect(() => {
+    if (preFilledData && isOpen) {
+      setFormData(prev => ({
+        ...prev,
+        name: preFilledData.name || prev.name,
+        email: preFilledData.email || prev.email,
+      }));
+    }
+  }, [preFilledData, isOpen]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -164,8 +188,16 @@ const ReservationModal = ({ isOpen, onClose }: ReservationModalProps) => {
               onClick={(e) => e.stopPropagation()}
               className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
             >
-              <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Reserve Your VIP Spot</h2>
+              <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
+                    <Crown className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Reserve Your VIP Spot</h2>
+                    <p className="text-sm text-gray-500">For just ${PAYMENT_CONFIG.reservationAmount}</p>
+                  </div>
+                </div>
                 <button
                   onClick={onClose}
                   className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
@@ -174,7 +206,24 @@ const ReservationModal = ({ isOpen, onClose }: ReservationModalProps) => {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6">
+              <div className="p-6">
+                {/* VIP Perks Section */}
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6 border border-indigo-200">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Crown className="w-5 h-5 text-indigo-600" />
+                    <h3 className="text-lg font-bold text-gray-900">Exclusive VIP Perks</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {VIP_PERKS.map((perk, index) => (
+                      <div key={index} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-700">{perk}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <form onSubmit={handleSubmit}>
                 <div className="space-y-4 mb-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -253,17 +302,27 @@ const ReservationModal = ({ isOpen, onClose }: ReservationModalProps) => {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg"
-                >
-                  Complete Reservation
-                </button>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="flex-1 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-all"
+                    >
+                      Skip for Now
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg"
+                    >
+                      Complete Reservation
+                    </button>
+                  </div>
 
-                <p className="text-xs text-gray-500 text-center mt-4">
-                  By reserving, you agree to our terms and conditions. You can cancel anytime.
-                </p>
-              </form>
+                  <p className="text-xs text-gray-500 text-center mt-4">
+                    By reserving, you agree to our terms and conditions. You can cancel anytime.
+                  </p>
+                </form>
+              </div>
             </motion.div>
           </motion.div>
         )}

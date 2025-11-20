@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { Crown, ArrowRight } from 'lucide-react';
-import ReservationModal from './ReservationModal';
+import SignUpModal from './SignUpModal';
 
 const ReservationCTA = () => {
   const [showModal, setShowModal] = useState(false);
@@ -51,7 +51,7 @@ const ReservationCTA = () => {
         </div>
       </section>
 
-      <ReservationModal
+      <SignUpModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
       />
