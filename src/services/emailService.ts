@@ -1,16 +1,17 @@
 /**
  * Email Service
  * 
- * This service handles sending email notifications to masikotimo@gmail.com
+ * This service handles sending email notifications using Netlify Functions.
  * 
- * You'll need to set up an email service provider. Options include:
- * - EmailJS (https://www.emailjs.com/) - Free tier available
- * - SendGrid (https://sendgrid.com/) - Free tier available
- * - AWS SES (https://aws.amazon.com/ses/) - Pay as you go
- * - Resend (https://resend.com/) - Free tier available
- * - Nodemailer with SMTP
+ * Setup:
+ * 1. Set environment variables in Netlify dashboard:
+ *    - EMAIL_USER: Your Gmail address
+ *    - EMAIL_PASS: Your Gmail App Password
+ *    - NOTIFICATION_EMAIL: Where to send notifications
+ * 2. The function at netlify/functions/send-email.js handles email sending
+ * 3. For local development, use: netlify dev
  * 
- * For production, create a backend API endpoint that handles email sending securely.
+ * See NETLIFY_EMAIL_SETUP.md for detailed setup instructions.
  */
 
 import { EMAIL_CONFIG } from '../config/offers';
@@ -34,48 +35,9 @@ export interface EmailData {
  */
 export const sendEmailNotification = async (emailData: EmailData): Promise<void> => {
   try {
-    // Option 1: Use EmailJS (client-side) - No backend needed!
-    // Set VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, and VITE_EMAILJS_PUBLIC_KEY
-    // Note: Install @emailjs/browser if using EmailJS: npm install @emailjs/browser
-    if (import.meta.env.VITE_EMAILJS_SERVICE_ID) {
-      try {
-        // @ts-ignore - Optional dependency, only loaded if EmailJS is configured
-        const emailjs = await import('@emailjs/browser');
-        
-        // Prepare template parameters based on email type
-        const templateParams: Record<string, string> = {
-          to_email: EMAIL_CONFIG.notificationEmail,
-          timestamp: new Date().toLocaleString(),
-        };
-
-        if (emailData.type === 'reservation') {
-          templateParams.name = emailData.data.name || '';
-          templateParams.email = emailData.data.email || '';
-          templateParams.phone = emailData.data.phone || 'Not provided';
-          templateParams.payment_method = emailData.data.paymentMethod || 'Not selected';
-          templateParams.amount = `$${emailData.data.amount || '0'}`;
-        } else {
-          templateParams.email = emailData.data.email || '';
-          templateParams.name = emailData.data.name || '';
-        }
-
-        await emailjs.send(
-          import.meta.env.VITE_EMAILJS_SERVICE_ID,
-          import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-          templateParams,
-          import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-        );
-        
-        console.log('Email sent via EmailJS');
-        return;
-      } catch (emailjsError) {
-        console.error('EmailJS error:', emailjsError);
-        // Fall through to API endpoint if EmailJS fails
-      }
-    }
-
-    // Option 2: Use backend API endpoint (Netlify Functions or Vercel)
-    // Set VITE_EMAIL_API_ENDPOINT (defaults to /api/send-email)
+    // Use Netlify Functions API endpoint
+    // The endpoint /api/send-email is automatically redirected to /.netlify/functions/send-email
+    // via netlify.toml configuration
     const endpoint = import.meta.env.VITE_EMAIL_API_ENDPOINT || '/api/send-email';
     
     const response = await fetch(endpoint, {
