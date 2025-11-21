@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { X, CreditCard, Smartphone, Wallet, Coins, CheckCircle2, Crown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { PAYMENT_CONFIG } from '../config/offers';
+import { PAYMENT_CONFIG, FundingTier } from '../config/offers';
 import PaymentMethodCard from './PaymentMethodCard';
 import USDTModal from './USDTModal';
 
@@ -13,6 +13,7 @@ interface ReservationModalProps {
     name: string;
     email: string;
   };
+  selectedTier?: FundingTier | null;
 }
 
 type PaymentMethod = 'card' | 'mobile-money' | 'paypal' | 'usdt' | null;
@@ -26,7 +27,7 @@ const VIP_PERKS = [
   'Special launch day bonuses',
 ];
 
-const ReservationModal = ({ isOpen, onClose, preFilledData }: ReservationModalProps) => {
+const ReservationModal = ({ isOpen, onClose, preFilledData, selectedTier }: ReservationModalProps) => {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null);
   const [showUSDTModal, setShowUSDTModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -34,6 +35,9 @@ const ReservationModal = ({ isOpen, onClose, preFilledData }: ReservationModalPr
     email: '',
     phone: '',
   });
+
+  // Calculate the amount based on selected tier or default to $1 reservation
+  const reservationAmount = selectedTier?.amount || PAYMENT_CONFIG.reservationAmount;
 
   // Populate form data when preFilledData is provided
   useEffect(() => {
@@ -130,7 +134,8 @@ const ReservationModal = ({ isOpen, onClose, preFilledData }: ReservationModalPr
     await sendEmailNotification('reservation', {
       ...data,
       paymentMethod: method,
-      amount: PAYMENT_CONFIG.reservationAmount,
+      amount: reservationAmount,
+      tier: selectedTier?.name || 'VIP Reservation',
     });
 
     // Here you would integrate with actual payment processors
@@ -194,8 +199,12 @@ const ReservationModal = ({ isOpen, onClose, preFilledData }: ReservationModalPr
                     <Crown className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Reserve Your VIP Spot</h2>
-                    <p className="text-sm text-gray-500">For just ${PAYMENT_CONFIG.reservationAmount}</p>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {selectedTier ? selectedTier.name : 'Reserve Your VIP Spot'}
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      {selectedTier ? `Support amount: $${reservationAmount}` : `For just $${reservationAmount}`}
+                    </p>
                   </div>
                 </div>
                 <button
@@ -207,21 +216,38 @@ const ReservationModal = ({ isOpen, onClose, preFilledData }: ReservationModalPr
               </div>
 
               <div className="p-6">
-                {/* VIP Perks Section */}
-                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6 border border-indigo-200">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Crown className="w-5 h-5 text-indigo-600" />
-                    <h3 className="text-lg font-bold text-gray-900">Exclusive VIP Perks</h3>
+                {/* Tier Benefits Section */}
+                {selectedTier ? (
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6 border border-indigo-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Crown className="w-5 h-5 text-indigo-600" />
+                      <h3 className="text-lg font-bold text-gray-900">{selectedTier.name} Benefits</h3>
+                    </div>
+                    <div className="space-y-2">
+                      {selectedTier.benefits.map((benefit, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700">{benefit}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {VIP_PERKS.map((perk, index) => (
-                      <div key={index} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-700">{perk}</span>
-                      </div>
-                    ))}
+                ) : (
+                  <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 mb-6 border border-indigo-200">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Crown className="w-5 h-5 text-indigo-600" />
+                      <h3 className="text-lg font-bold text-gray-900">Exclusive VIP Perks</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {VIP_PERKS.map((perk, index) => (
+                        <div key={index} className="flex items-start gap-2">
+                          <CheckCircle2 className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5" />
+                          <span className="text-sm text-gray-700">{perk}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <form onSubmit={handleSubmit}>
                 <div className="space-y-4 mb-6">
@@ -297,7 +323,7 @@ const ReservationModal = ({ isOpen, onClose, preFilledData }: ReservationModalPr
                   <div className="flex items-center justify-between">
                     <span className="text-gray-700 font-medium">Total Amount</span>
                     <span className="text-2xl font-bold text-indigo-600">
-                      ${PAYMENT_CONFIG.reservationAmount}
+                      ${reservationAmount}
                     </span>
                   </div>
                 </div>
@@ -335,11 +361,13 @@ const ReservationModal = ({ isOpen, onClose, preFilledData }: ReservationModalPr
           onClose();
         }}
         formData={formData}
+        amount={reservationAmount}
         onConfirm={async () => {
           await sendEmailNotification('reservation', {
             ...formData,
             paymentMethod: 'usdt',
-            amount: PAYMENT_CONFIG.reservationAmount,
+            amount: reservationAmount,
+            tier: selectedTier?.name || 'VIP Reservation',
           });
           toast.success('Reservation confirmed! We will verify your USDT payment and send confirmation.');
           setShowUSDTModal(false);

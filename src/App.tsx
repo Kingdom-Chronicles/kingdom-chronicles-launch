@@ -5,6 +5,7 @@ import GamesSection from './components/GamesSection';
 import ScreenshotCarousel from './components/ScreenshotCarousel';
 import VIPBenefits from './components/VIPBenefits';
 import PerksSection from './components/PerksSection';
+import FundingTiers from './components/FundingTiers';
 import ReservationCTA from './components/ReservationCTA';
 import FAQ from './components/FAQ';
 import EmailSubscription from './components/EmailSubscription';
@@ -20,6 +21,7 @@ function App() {
       <ScreenshotCarousel />
       <VIPBenefits />
       <PerksSection />
+      <FundingTiers />
       <ReservationCTA />
       <FAQ />
       <EmailSubscription />

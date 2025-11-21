@@ -13,13 +13,15 @@ interface USDTModalProps {
     phone: string;
   };
   onConfirm: () => void;
+  amount?: number;
 }
 
-const USDTModal = ({ isOpen, onClose, formData: _formData, onConfirm }: USDTModalProps) => {
+const USDTModal = ({ isOpen, onClose, formData: _formData, onConfirm, amount }: USDTModalProps) => {
   const [copied, setCopied] = useState(false);
   const [hasSent, setHasSent] = useState(false);
 
   const walletAddress = PAYMENT_CONFIG.usdtWalletAddress;
+  const paymentAmount = amount || PAYMENT_CONFIG.reservationAmount;
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(walletAddress);
@@ -69,7 +71,7 @@ const USDTModal = ({ isOpen, onClose, formData: _formData, onConfirm }: USDTModa
                   ⚠️ Important Instructions
                 </p>
                 <ol className="text-sm text-yellow-700 space-y-1 list-decimal list-inside">
-                  <li>Send exactly <strong>${PAYMENT_CONFIG.reservationAmount} USDT</strong> to the address below</li>
+                  <li>Send exactly <strong>${paymentAmount} USDT</strong> to the address below</li>
                   <li>Make sure to use <strong>TRC-20 network</strong> only</li>
                   <li>Copy the wallet address carefully</li>
                   <li>After sending, click "I have sent the payment" below</li>
@@ -110,7 +112,7 @@ const USDTModal = ({ isOpen, onClose, formData: _formData, onConfirm }: USDTModa
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-gray-600">Amount to Send</span>
                   <span className="text-lg font-bold text-gray-900">
-                    ${PAYMENT_CONFIG.reservationAmount} USDT
+                    ${paymentAmount} USDT
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -128,7 +130,7 @@ const USDTModal = ({ isOpen, onClose, formData: _formData, onConfirm }: USDTModa
                   className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                 />
                 <label htmlFor="hasSent" className="text-sm text-gray-700">
-                  I have sent the payment of ${PAYMENT_CONFIG.reservationAmount} USDT to the address above
+                  I have sent the payment of ${paymentAmount} USDT to the address above
                 </label>
               </div>
 

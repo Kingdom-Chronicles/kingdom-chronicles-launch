@@ -2,15 +2,16 @@ import { useState } from 'react';
 import { X, Mail, User, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { EMAIL_CONFIG } from '../config/offers';
+import { EMAIL_CONFIG, FundingTier } from '../config/offers';
 import ReservationModal from './ReservationModal';
 
 interface SignUpModalProps {
   isOpen: boolean;
   onClose: () => void;
+  selectedTier?: FundingTier | null;
 }
 
-const SignUpModal = ({ isOpen, onClose }: SignUpModalProps) => {
+const SignUpModal = ({ isOpen, onClose, selectedTier }: SignUpModalProps) => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -111,7 +112,14 @@ const SignUpModal = ({ isOpen, onClose }: SignUpModalProps) => {
               className="bg-white rounded-2xl shadow-2xl max-w-md w-full"
             >
               <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-                <h2 className="text-2xl font-bold text-gray-900">Join Kingdom Chronicles</h2>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Join Kingdom Chronicles</h2>
+                  {selectedTier && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Selected: {selectedTier.name} - ${selectedTier.amount}
+                    </p>
+                  )}
+                </div>
                 <button
                   onClick={onClose}
                   className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
@@ -123,7 +131,10 @@ const SignUpModal = ({ isOpen, onClose }: SignUpModalProps) => {
               <form onSubmit={handleSubmit} className="p-6">
                 <div className="mb-6">
                   <p className="text-gray-600 mb-6">
-                    Sign up to stay updated on Kingdom Chronicles and get exclusive access to early features and special offers.
+                    {selectedTier 
+                      ? `Sign up to complete your ${selectedTier.name} backing and get exclusive access to all tier benefits.`
+                      : 'Sign up to stay updated on Kingdom Chronicles and get exclusive access to early features and special offers.'
+                    }
                   </p>
                 </div>
 
@@ -193,6 +204,7 @@ const SignUpModal = ({ isOpen, onClose }: SignUpModalProps) => {
         isOpen={showReservationModal}
         onClose={handleReservationClose}
         preFilledData={formData}
+        selectedTier={selectedTier}
       />
     </>
   );
